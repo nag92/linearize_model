@@ -1,47 +1,35 @@
-import theano.tensor as T
-from ilqr.dynamics import AutoDiffDynamics
-from ilqr.cost import PathQRCost
+from ilqr.dynamics import FiniteDiffDynamics
 import numpy as np
-from ilqr import iLQR
-import matplotlib.pyplot as plt
-J_hist = []
-def on_iteration(iteration_count, xs, us, J_opt, accepted, converged):
-    J_hist.append(J_opt)
-    info = "converged" if converged else ("accepted" if accepted else "failed")
-    print("iteration", iteration_count, info, J_opt)
+state_size = 2  # [position, velocity]
+action_size = 1  # [force]
 
+dt = 0.01  # Discrete time-step in seconds.
+m = 1.0  # Mass in kg.
+alpha = 0.1  # Friction coefficient.
 
-dt = 0.01
-x = T.dscalar("x")
-u = T.dscalar("u")
-t = T.dscalar("t")
+def f(x, u, i):
+    """Dynamics model function.
 
-x_dot = (dt * t - u) * x**2
-f = T.stack([x + x_dot * dt])
+    Args:
+        x: State vector [state_size].
+        u: Control vector [action_size].
+        i: Current time step.
 
-dynamics = AutoDiffDynamics(f, [x], [u], t)
+    Returns:
+        Next state vector [state_size].
+    """
+    [x, x_dot] = x
+    [F] = u
 
+    # Acceleration.
+    x_dot_dot = x_dot * (1 - alpha * dt / m) + F * dt / m
+    print
+    return np.array([
+        x + x_dot * dt,
+        x_dot + x_dot_dot * dt,
+    ])
 
-T = 200
-state_size = 1
-action_size = 1
-
-Q = np.eye(state_size)
-R = np.eye(action_size)
-
-dist = np.linspace(0, 3.14, T + 1).reshape(-1, 1)
-x_path = np.sin(dist)
-dist = np.linspace(0, 3.14, T ).reshape(-1, 1)
-u_path = -np.cos(dist)
-
-cost = PathQRCost(Q, R, x_path, u_path=u_path)
-
-from ilqr.dynamics import tensor_constrain, constrain
-
-# When building dynamics model...
-
-# When fitting..
-ilqr = iLQR(dynamics, cost, T)
-us_init = np.random.uniform(-1, 1, (T, dynamics.action_size))
-xs, us_unconstrained = ilqr.fit([0.0], us_init,n_iterations=10000,on_iteration=on_iteration)
-print(xs)
+# NOTE: Unlike with AutoDiffDynamics, this is instantaneous, but will not be
+# as accurate.
+dynamics = FiniteDiffDynamics(f, state_size, action_size)
+print(dynamics.action_size)
