@@ -136,8 +136,8 @@ ilqr = iLQR(dynamics, cost2, N-1)
 xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 
 _ = plt.title("Trajectory of the two omnidirectional vehicles")
-_ = plt.plot(hip["q"], "r")
-_ = plt.plot(xs[:,0], "b")
+_ = plt.plot(knee["q"], "r")
+_ = plt.plot(xs[:,1], "b")
 _ = plt.legend(["Vehicle 1", "Vehicle 2"])
 
 plt.show()
