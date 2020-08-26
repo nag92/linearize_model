@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 
 from ilqr import iLQR
-from ilqr.cost import QRCost, PathQRCost
+from ilqr.cost import QRCost, PathQRCost, PathQsRCost
 from ilqr.dynamics import AutoDiffDynamics
 
 
@@ -107,17 +107,18 @@ for i in range(N):
     x_path.append([x_traj["q"][i][0], y_traj["q"][i][0], x_traj["qd"][i][0], y_traj["qd"][i][0] ])
 
 for i in range(N-1):
-    u_path.append([x_traj["qdd"][i][0], y_traj["qdd"][i][0]])
+    #u_path.append([x_traj["qdd"][i][0], y_traj["qdd"][i][0]])
+    u_path.append([0.0, 0.0])
 
 x_path = np.array(x_path)
 u_path = np.array(u_path)
 Q = np.eye(dynamics.state_size)*125.0
-Q[2, 2] = -1.00
-Q[3, 3] = -1.0
+Q[2,2] = Q[3,3] = 0
+Q = [Q]*N
 R = 0.01 * np.eye(dynamics.action_size)
 
-cost = QRCost(Q, R)
-cost2 = PathQRCost(Q,R,x_path=x_path,u_path=u_path)
+#cost = QRCost(Q, R)
+cost2 = PathQsRCost(Q,R,x_path=x_path,u_path=u_path)
 
 # Random initial action path.
 us_init = np.random.uniform(-1, 1, (N-1, dynamics.action_size))
@@ -145,7 +146,7 @@ y_0_dot = xs[:, 3]
 
 _ = plt.title("Trajectory of the two omnidirectional vehicles")
 _ = plt.plot(x_0, y_0, "r")
-#_ = plt.plot(x_path[:,0], x_path[:,1], "b")
+_ = plt.plot(x_path[:,0], x_path[:,1], "b")
 _ = plt.legend(["Vehicle 1", "Vehicle 2"])
 
 plt.show()
