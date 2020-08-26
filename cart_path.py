@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 # In[4]:
 
 
-from ilqr import iLQR
+from ilqr import iLQR, RecedingHorizonController
 from ilqr.cost import QRCost, PathQRCost, PathQsRCost
 from ilqr.dynamics import AutoDiffDynamics
 
@@ -114,11 +114,11 @@ x_path = np.array(x_path)
 u_path = np.array(u_path)
 Q = np.eye(dynamics.state_size)*125.0
 Q[2,2] = Q[3,3] = 0
-Q = [Q]*N
+#Q = [Q]*N
 R = 0.01 * np.eye(dynamics.action_size)
 
-#cost = QRCost(Q, R)
-cost2 = PathQsRCost(Q,R,x_path=x_path,u_path=u_path)
+cost = QRCost(Q, R)
+#cost = PathQsRCost(Q,R,x_path=x_path,u_path=u_path)
 
 # Random initial action path.
 us_init = np.random.uniform(-1, 1, (N-1, dynamics.action_size))
@@ -128,11 +128,33 @@ us_init = np.random.uniform(-1, 1, (N-1, dynamics.action_size))
 
 
 J_hist = []
-ilqr = iLQR(dynamics, cost2, N-1)
-xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
+ilqr = iLQR(dynamics, cost, N-1)
+#xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 
 
-# In[10]:
+controller = RecedingHorizonController(x0,ilqr)
+count =0
+plt.ion()
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.set_xlim([4, 12])
+ax.set_ylim([5, 12])
+x = []
+y = []
+
+
+line1, = ax.plot(x, y, 'r-')
+for xs2, us2 in controller.control(us_init):
+    print(xs2[1][1])
+    x.append(xs2[0][0])
+    y.append(xs2[0][1])
+    count+=1
+    line1.set_ydata(y)
+    line1.set_xdata(x)
+    fig.canvas.draw()
+    fig.canvas.flush_events()
+
 
 
 x_0 = xs[:, 0]

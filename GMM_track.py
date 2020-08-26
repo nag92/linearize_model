@@ -5,7 +5,7 @@ import numpy as np
 import theano.tensor as T
 import matplotlib.pyplot as plt
 
-from ilqr import iLQR
+from ilqr import iLQR, RecedingHorizonController
 from ilqr.cost import QRCost, PathQRCost, PathQsRCost
 
 from ilqr.dynamics import AutoDiffDynamics, BatchAutoDiffDynamics, FiniteDiffDynamics
@@ -72,7 +72,31 @@ us_init = np.random.uniform(-1, 1, (99, dynamics.action_size))
 #
 J_hist = []
 ilqr = iLQR(dynamics, cost2, 99)
-xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
+# xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
+
+controller = RecedingHorizonController(x0,ilqr)
+count =0
+plt.ion()
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.set_xlim([0, 200])
+ax.set_ylim([-.8, -0.1])
+x = []
+y = []
+
+
+line1, = ax.plot(x, y, 'r-')
+for xs2, us2 in controller.control(us_init):
+    print(xs2[0][0])
+    y.append(xs2[0][0])
+    x.append(count)
+    count+=1
+    line1.set_ydata(y)
+    line1.set_xdata(x)
+    fig.canvas.draw()
+    fig.canvas.flush_events()
+
 
 _ = plt.title("Trajectory of the two omnidirectional vehicles")
 _ = plt.plot(x_path[:,0], "r")
