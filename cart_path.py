@@ -117,7 +117,7 @@ Q[2,2] = Q[3,3] = 0
 #Q = [Q]*N
 R = 0.01 * np.eye(dynamics.action_size)
 
-cost = QRCost(Q, R)
+cost = PathQRCost(Q, R, x_path=x_path,u_path=u_path)
 #cost = PathQsRCost(Q,R,x_path=x_path,u_path=u_path)
 
 # Random initial action path.

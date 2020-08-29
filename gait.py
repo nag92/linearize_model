@@ -123,10 +123,10 @@ x_path = np.array(x_path)
 u_path = np.array(u_path)
 Q = np.eye(dynamics.state_size)*125.0
 Q[6, 6] = Q[7, 7] = Q[8, 8] = Q[9, 9] = Q[10, 10] = Q[11, 11] = 0.0
-Q = [Q]*N
+#Q = [Q]*N
 R = 0.01 * np.eye(dynamics.action_size)
 
-cost2 = PathQsRCost(Q, R, x_path=x_path,u_path=u_path)
+cost2 = PathQRCost(Q, R, x_path=x_path,u_path=u_path)
 
 # Random initial action path.
 us_init = np.random.uniform(-1, 1, (N-1, dynamics.action_size))

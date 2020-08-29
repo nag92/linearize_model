@@ -82,7 +82,7 @@ N = 200  # Number of time steps in trajectory.
 x0 = np.array([10.0, 10.0, 5.0, 0.0 ])  # Initial state.
 
 # Random initial action path.
-us_init = np.random.uniform(-1, 1, (N, dynamics.action_size))
+us_init = np.random.uniform(-100, 100, (N, dynamics.action_size))
 
 
 # In[9]:
