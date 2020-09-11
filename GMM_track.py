@@ -27,14 +27,18 @@ def on_iteration(iteration_count, xs, us, J_opt, accepted, converged):
     info = "converged" if converged else ("accepted" if accepted else "failed")
     print("iteration", iteration_count, info, J_opt)
 
-max_bounds = 10.0
-min_bounds = -10.0
+# max_bounds = 10.0
+# min_bounds = -10.0
 
-def f(x, u, i):
+max_bounds = 8.0
+min_bounds = -8.0
 
-    diff = (max_bounds - min_bounds) / 2.0
-    mean = (max_bounds + min_bounds) / 2.0
-    us = diff * np.tanh(u) + mean
+
+def f(x, us, i):
+
+    # diff = (max_bounds - min_bounds) / 2.0
+    # mean = (max_bounds + min_bounds) / 2.0
+    # us = diff * np.tanh(u) + mean
     y = model.runge_integrator(my_model, x, 0.01, us)
 
     return np.array(y)
@@ -48,8 +52,6 @@ def f2(x, u, i):
 
 
 dynamics = FiniteDiffDynamics(f, 12, 6)
-
-
 
 runner = TPGMMRunner.TPGMMRunner("/home/nathaniel/catkin_ws/src/ambf_walker/Train/gotozero.pickle")
 
@@ -75,7 +77,16 @@ for ii in range(len(expSigma)-2, -1, -1):
 x0 = x_path[0]
 x_path = np.array(x_path)
 u_path = np.array(u_path)
-R = 0.05 * np.eye(dynamics.action_size)
+# R = 0.05 * np.eye(dynamics.action_size) # +/-10
+R = 0.1 * np.eye(dynamics.action_size)
+R[1,1] = 40.0
+R[4,4] = 40.0
+
+R[1,1] = 40.0
+R[4,4] = 40.0
+
+print(R)
+#
 #
 cost2 = PathQsRCost(Q, R, x_path=x_path,u_path=u_path)
 #
@@ -86,8 +97,6 @@ J_hist = []
 ilqr = iLQR(dynamics, cost2, N-1)
 xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 
-
-
 # max_bounds = 15.0
 # min_bounds = -15.0
 # diff = (max_bounds - min_bounds) / 2.0
@@ -95,9 +104,10 @@ xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 # us[:,0] = diff * np.tanh(us[:,0]) + mean
 #
 
-diff = (max_bounds - min_bounds) / 2.0
-mean = (max_bounds + min_bounds) / 2.0
-us = diff * np.tanh(us) + mean
+# diff = (max_bounds - min_bounds) / 2.0
+# mean = (max_bounds + min_bounds) / 2.0
+# us = diff * np.tanh(us) + mean
+
 #
 #
 # max_bounds = 1.0
@@ -135,27 +145,45 @@ us = diff * np.tanh(us) + mean
 #     line2.set_xdata(x)
 #     fig.canvas.draw()
 #     fig.canvas.flush_events()
-
+with open('test.npy', 'wb') as f:
+    np.save(f, us)
+print(len(us))
+file = "/home/nathaniel/PycharmProjects/linearize_model/test.npy"
+with open(file, 'rb') as f:
+    us2 = np.load(f)
 y = x0
 path = []
 for i in range(N-1):
-    y = f2(y, us[i], i)
+    y = f2(y, us2[i], i)
     path.append(y)
 
 path = np.array(path)
 
-f, (ax1, ax2) = plt.subplots(2, 1,sharex=True)
-_ = ax1.set_title("Trajectory of Hip")
-_ = ax1.set_ylabel("angle")
-_ = ax1.plot(x_path[:, 2], "r")
-_ = ax1.plot(path[:, 2], "g")
-_ = ax1.legend(["Desired", "actually"])
+f,  axes = plt.subplots(2, 3, sharex=True)
 
-_ = ax2.set_title("Control Signal")
-_ = ax2.plot(us[:, 2], "g")
-_ = ax2.set_ylabel("Torque")
-_ = ax2.legend(["Control sig"])
-_ = ax2.set_label("Time step")
+axes[0, 0].plot(x_path[:, 0], "r")
+axes[0, 0].plot(path[:, 0], "g")
+axes[0, 1].plot(x_path[:, 1], "r")
+axes[0, 1].plot(path[:, 1], "g")
+axes[0, 2].plot(x_path[:, 2], "r")
+axes[0, 2].plot(path[:, 2], "g")
+
+axes[1, 0].plot(us2[:, 0], "r")
+axes[1, 1].plot(us2[:, 1], "r")
+axes[1, 2].plot(us2[:, 2], "r")
+
+
+# _ = ax1.set_title("Trajectory of Hip")
+# _ = ax1.set_ylabel("angle")
+# _ = ax1.plot(x_path[:, 2], "r")
+# _ = ax1.plot(path[:, 2], "g")
+# _ = ax1.legend(["Desired", "actually"])
+#
+# _ = ax2.set_title("Control Signal")
+# _ = ax2.plot(us[:, 2], "g")
+# _ = ax2.set_ylabel("Torque")
+# _ = ax2.legend(["Control sig"])
+# _ = ax2.set_label("Time step")
 
 
 plt.show()
