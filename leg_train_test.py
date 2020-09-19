@@ -89,7 +89,7 @@ R = 0.01 * np.eye(dynamics.action_size)
 print(R)
 #
 #
-cost2 = PathQsRCost(Q, R, x_path=x_path,u_path=u_path)
+cost2 = PathQsRCost(Q, R, x_path=x_path, u_path=u_path)
 #
 # # Random initial action path.
 us_init = np.random.uniform(-1, 1, (N-1, dynamics.action_size))
@@ -98,54 +98,52 @@ J_hist = []
 ilqr = iLQR(dynamics, cost2, N-1)
 xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 
-# max_bounds = 15.0
-# min_bounds = -15.0
-# diff = (max_bounds - min_bounds) / 2.0
-# mean = (max_bounds + min_bounds) / 2.0
-# us[:,0] = diff * np.tanh(us[:,0]) + mean
+R = 18.0 * np.eye(dynamics.action_size)
+R[1,1] = 40.0
+# R[4,4] = 40.0
 #
+# R[1,1] = 40.0
+# R[4,4] = 40.0
 
-# diff = (max_bounds - min_bounds) / 2.0
-# mean = (max_bounds + min_bounds) / 2.0
-# us = diff * np.tanh(us) + mean
 
-#
-#
-# max_bounds = 1.0
-# min_bounds = -1.0
-# diff = (max_bounds - min_bounds) / 2.0
-# mean = (max_bounds + min_bounds) / 2.0
-# us[:,2] = diff * np.tanh(us[:,2]) + mean
-# us[:,5] = diff * np.tanh(us[:,2]) + mean
+cost2 = PathQsRCost(Q, R, x_path, us)
 
-# #Constrain the actions to see what's actually applied to the system.
-# controller = RecedingHorizonController(x0,ilqr)
-# count =0
-# plt.ion()
+ilqr2 = iLQR(dynamics, cost2, N-1)
+
+cntrl = RecedingHorizonController(x0, ilqr2)
+
+plt.ion()
+
+count = 0
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.set_xlim([0, 200])
+ax.set_ylim([-0.10, -0.80])
+x = []
+y = []
+x_follow = []
+y_follow = []
+
+line1, = ax.plot(x, y, 'r-')
+line2, = ax.plot(x_follow, y_follow, 'b-')
+count = 0
+for xs2, us2 in cntrl.control(us):
+
+    x.append(count)
+    y.append(xs2[0][0])
+    x_follow.append(count)
+    y_follow.append(x_path[count][0])
+    count += 1
+    #cntrl.set_state(xs2[1])
+    count += 1
+    line1.set_ydata(y)
+    line1.set_xdata(x)
+
+    line2.set_ydata(y_follow)
+    line2.set_xdata(x_follow)
+    fig.canvas.draw()
+    fig.canvas.flush_events()
 #
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# ax.set_xlim([0, 200])
-# ax.set_ylim([-.8, -0.1])
-# x = []
-# y1 = []
-# y2 = []
-#
-#
-# line1, = ax.plot(x, y1, 'r-')
-# line2, = ax.plot(x, y2, 'r-')
-# for xs2, us2 in controller.control(us_init):
-#     print(xs2)
-#     y1.append(xs2[0][0])
-#     y2.append(xs2[1][0])
-#     x.append(count)
-#     count+=1
-#     line1.set_ydata(y1)
-#     line2.set_ydata(y2)
-#     line1.set_xdata(x)
-#     line2.set_xdata(x)
-#     fig.canvas.draw()
-#     fig.canvas.flush_events()
 with open('test.npy', 'wb') as f:
     np.save(f, us)
 print(len(us))

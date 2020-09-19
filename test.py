@@ -3,6 +3,9 @@ import numpy as np
 from ilqr import iLQR
 from ilqr.cost import QRCost
 import matplotlib.pyplot as plt
+
+
+
 state_size = 2  # [position, velocity]
 action_size = 1  # [force]
 
@@ -11,16 +14,7 @@ m = 1.0  # Mass in kg.
 alpha = 0.1  # Friction coefficient.
 
 def f(x, u, i):
-    """Dynamics model function.
 
-    Args:
-        x: State vector [state_size].
-        u: Control vector [action_size].
-        i: Current time step.
-
-    Returns:
-        Next state vector [state_size].
-    """
     [x, x_dot] = x
     [F] = u
 
@@ -32,16 +26,17 @@ def f(x, u, i):
         x_dot + x_dot_dot * dt,
     ])
 
-# NOTE: Unlike with AutoDiffDynamics, this is instantaneous, but will not be
-# as accurate.
+
+
+
+
+
 dynamics = FiniteDiffDynamics(f, state_size, action_size)
 
 state_size = 2  # [position, velocity]
 action_size = 1  # [force]
 
-# The coefficients weigh how much your state error is worth to you vs
-# the size of your controls. You can favor a solution that uses smaller
-# controls by increasing R's coefficient.
+
 Q = 100 * np.eye(state_size)
 R = 0.01 * np.eye(action_size)
 

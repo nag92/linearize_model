@@ -2,7 +2,7 @@
   <library name="workspace">
     <CLASSES />
     <SOURCES>
-      <root url="file://$USER_HOME$" />
+      <root url="file://$APPLICATION_HOME_DIR$/bin" />
     </SOURCES>
   </library>
 </component>
