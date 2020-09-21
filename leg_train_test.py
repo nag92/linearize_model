@@ -11,7 +11,7 @@ from ilqr.controller import RecedingHorizonControllerPath
 from ilqr.cost import QRCost, PathQRCost, PathQsRCost, PathQRCostMPC
 from ilqr.dynamics import FiniteDiffDynamics
 from ilqr.dynamics import AutoDiffDynamics, BatchAutoDiffDynamics, FiniteDiffDynamics
-
+import random
 
 dt = 0.01  # Discrete time-step in seconds.
 tf = 2.0
@@ -106,11 +106,11 @@ R = 0.01 * np.eye(dynamics.action_size)
 # R[4,4] = 40.0
 
 
-cost2 = PathQRCostMPC(Q[0], R, x_path, us_init)
+cost2 = PathQRCostMPC(Q[0], R, x_path, us)
 
 ilqr2 = iLQR(dynamics, cost2, N-1)
 
-cntrl = RecedingHorizonControllerPath(x0, ilqr2,initial_n_iterations=10)
+cntrl = RecedingHorizonControllerPath(x0, ilqr2)
 
 plt.ion()
 
@@ -128,14 +128,14 @@ line1, = ax.plot(x, y, 'r-')
 line2, = ax.plot(x_follow, y_follow, 'b-')
 count = 0
 
-for xs2, us2 in cntrl.control(us_init):
+for xs2, us2 in cntrl.control(us):
 
     x.append(count)
     y.append(xs2[0][0])
     x_follow.append(count)
     y_follow.append(x_path[count][0])
     count += 1
-    #cntrl.set_state(xs2[1])
+    cntrl.set_state(xs2[1] )
     line1.set_ydata(y)
     line1.set_xdata(x)
 
