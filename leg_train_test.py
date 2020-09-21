@@ -5,10 +5,11 @@ import numpy as np
 import theano.tensor as T
 import matplotlib.pyplot as plt
 from ilqr.dynamics import constrain
-
+from GaitAnaylsisToolkit.LearningTools.Runner import TPGMMRunner
 from ilqr import iLQR, RecedingHorizonController
-from ilqr.cost import QRCost, PathQRCost, PathQsRCost
-
+from ilqr.controller import RecedingHorizonControllerPath
+from ilqr.cost import QRCost, PathQRCost, PathQsRCost, PathQRCostMPC
+from ilqr.dynamics import FiniteDiffDynamics
 from ilqr.dynamics import AutoDiffDynamics, BatchAutoDiffDynamics, FiniteDiffDynamics
 
 
@@ -16,10 +17,10 @@ dt = 0.01  # Discrete time-step in seconds.
 tf = 2.0
 m = 1.0  # Mass in kg.
 alpha = 0.1  # Friction coefficient.
-from ilqr.dynamics import FiniteDiffDynamics
+
 my_model = model.dynamic_model()
 J_hist = []
-from GaitAnaylsisToolkit.LearningTools.Runner import TPGMMRunner
+
 
 
 def on_iteration(iteration_count, xs, us, J_opt, accepted, converged):
@@ -89,28 +90,27 @@ R = 0.01 * np.eye(dynamics.action_size)
 print(R)
 #
 #
-cost2 = PathQsRCost(Q, R, x_path=x_path, u_path=u_path)
+cost = PathQRCost(Q[0], R, x_path=x_path, u_path=u_path)
 #
 # # Random initial action path.
 us_init = np.random.uniform(-1, 1, (N-1, dynamics.action_size))
 #
 J_hist = []
-ilqr = iLQR(dynamics, cost2, N-1)
+ilqr = iLQR(dynamics, cost, N-1)
 xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 
-R = 18.0 * np.eye(dynamics.action_size)
-R[1,1] = 40.0
-# R[4,4] = 40.0
+R = 0.01 * np.eye(dynamics.action_size)
+
 #
 # R[1,1] = 40.0
 # R[4,4] = 40.0
 
 
-cost2 = PathQsRCost(Q, R, x_path, us)
+cost2 = PathQRCostMPC(Q[0], R, x_path, us_init)
 
 ilqr2 = iLQR(dynamics, cost2, N-1)
 
-cntrl = RecedingHorizonController(x0, ilqr2)
+cntrl = RecedingHorizonControllerPath(x0, ilqr2,initial_n_iterations=10)
 
 plt.ion()
 
@@ -127,7 +127,8 @@ y_follow = []
 line1, = ax.plot(x, y, 'r-')
 line2, = ax.plot(x_follow, y_follow, 'b-')
 count = 0
-for xs2, us2 in cntrl.control(us):
+
+for xs2, us2 in cntrl.control(us_init):
 
     x.append(count)
     y.append(xs2[0][0])
@@ -135,7 +136,6 @@ for xs2, us2 in cntrl.control(us):
     y_follow.append(x_path[count][0])
     count += 1
     #cntrl.set_state(xs2[1])
-    count += 1
     line1.set_ydata(y)
     line1.set_xdata(x)
 
@@ -143,6 +143,9 @@ for xs2, us2 in cntrl.control(us):
     line2.set_xdata(x_follow)
     fig.canvas.draw()
     fig.canvas.flush_events()
+    us = us[1:]
+    if count == 199:
+        break
 #
 with open('test.npy', 'wb') as f:
     np.save(f, us)
