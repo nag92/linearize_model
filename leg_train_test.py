@@ -12,6 +12,8 @@ from ilqr.cost import QRCost, PathQRCost, PathQsRCost, PathQRCostMPC
 from ilqr.dynamics import FiniteDiffDynamics
 from ilqr.dynamics import AutoDiffDynamics, BatchAutoDiffDynamics, FiniteDiffDynamics
 import random
+import sys
+from tqdm import tqdm
 
 dt = 0.01  # Discrete time-step in seconds.
 tf = 2.0
@@ -49,12 +51,15 @@ def f2(x, u, i):
     y = model.runge_integrator(my_model, x, 0.01, u)
 
     return np.array(y)
+############################################## MODIFY ####################
+
+###### original : return np.array(y)
 
 
 
 dynamics = FiniteDiffDynamics(f, 12, 6)
 
-runner = TPGMMRunner.TPGMMRunner("/home/nathanielgoldfarb/catkin_ws/src/ambf_walker/Train/gotozero.pickle")
+runner = TPGMMRunner.TPGMMRunner("/home/jack/catkin_ws/src/ambf_walker/Train/gotozero.pickle")
 
 x_path = []
 u_path = []
@@ -108,53 +113,77 @@ R = 0.01 * np.eye(dynamics.action_size)
 
 cost2 = PathQRCostMPC(Q[0], R, x_path, us)
 
+
 ilqr2 = iLQR(dynamics, cost2, N-1)
+
 
 cntrl = RecedingHorizonControllerPath(x0, ilqr2)
 
-plt.ion()
-
-count = 0
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.set_xlim([0, 200])
-ax.set_ylim([-0.10, -0.80])
-x = []
-y = []
-x_follow = []
-y_follow = []
-
-line1, = ax.plot(x, y, 'r-')
-line2, = ax.plot(x_follow, y_follow, 'b-')
-count = 0
-
-for xs2, us2 in cntrl.control(us):
-
-    x.append(count)
-    y.append(xs2[0][0])
-    x_follow.append(count)
-    y_follow.append(x_path[count][0])
-    count += 1
-    cntrl.set_state(xs2[1] )
-    line1.set_ydata(y)
-    line1.set_xdata(x)
-
-    line2.set_ydata(y_follow)
-    line2.set_xdata(x_follow)
-    fig.canvas.draw()
-    fig.canvas.flush_events()
-    us = us[1:]
-    if count == 199:
-        break
+# plt.ion()
 #
-with open('test.npy', 'wb') as f:
-    np.save(f, us)
-print(len(us))
-file = "/home/nathanielgoldfarb/linearize_model/test.npy"
+# count = 0
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# ax.set_xlim([0, 200])
+# ax.set_ylim([-0.10, -0.80])
+# x = []
+# y = []
+# x_follow = []
+# y_follow = []
+# us3 = []
+#
+# line1, = ax.plot(x, y, 'r-')
+# line2, = ax.plot(x_follow, y_follow, 'b-')
+# count = 0
+#
+# print(sys.getsizeof(cntrl.control(us)))
+#
+# # for a, b in cntrl.control(us):
+# #     print(a)
+# #     print(b)
+# len_us = len(us)
+# print(f"len(us)={len_us}")
+#
+# # with open('test.npy', 'wb') as f:
+# #     np.save(f, us)
+# # print(len(us))
+# # print('step1')
+#
+# for xs2, us2 in tqdm(cntrl.control(us)):
+#     print(us2[0])
+#     us3.append(us2[0])
+#     x.append(count)
+#     y.append(xs2[0][0])
+#     x_follow.append(count)
+#     y_follow.append(x_path[count][0])
+#     count += 1
+#     cntrl.set_state(xs2[1])
+#     line1.set_ydata(y)
+#     line1.set_xdata(x)
+#     line2.set_ydata(y_follow)
+#     line2.set_xdata(x_follow)
+#     fig.canvas.draw()
+#     fig.canvas.flush_events()
+#     us = us[1:]
+#     if count == 199:
+#         break
+# # plt.show()
+#
+# print(us3)
+#
+# with open('test2.npy', 'wb') as f:
+#     np.save(f, us3)
+# print(len(us))
+
+print('step2')
+# file = "/home/jack/test.npy"
+file = "/home/jack/catkin_ws/src/linearize_model/test2.npy"
 with open(file, 'rb') as f:
     us2 = np.load(f)
+
 y = x0
 path = []
+#plt.figure(2)
 for i in range(N-1):
     y = f2(y, us2[i], i)
     path.append(y)
