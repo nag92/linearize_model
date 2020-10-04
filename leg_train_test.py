@@ -85,7 +85,7 @@ x_path = np.array(x_path)
 u_path = np.array(u_path)
 
 # R = 0.05 * np.eye(dynamics.action_size) # +/-10
-R = 0.01 * np.eye(dynamics.action_size)
+R = 0.05 * np.eye(dynamics.action_size)
 # R[1,1] = 40.0
 # R[4,4] = 40.0
 #
@@ -119,60 +119,60 @@ ilqr2 = iLQR(dynamics, cost2, N-1)
 
 cntrl = RecedingHorizonControllerPath(x0, ilqr2)
 
-# plt.ion()
-#
-# count = 0
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# ax.set_xlim([0, 200])
-# ax.set_ylim([-0.10, -0.80])
-# x = []
-# y = []
-# x_follow = []
-# y_follow = []
-# us3 = []
-#
-# line1, = ax.plot(x, y, 'r-')
-# line2, = ax.plot(x_follow, y_follow, 'b-')
-# count = 0
-#
-# print(sys.getsizeof(cntrl.control(us)))
-#
-# # for a, b in cntrl.control(us):
-# #     print(a)
-# #     print(b)
-# len_us = len(us)
-# print(f"len(us)={len_us}")
-#
-# # with open('test.npy', 'wb') as f:
-# #     np.save(f, us)
-# # print(len(us))
-# # print('step1')
-#
-# for xs2, us2 in tqdm(cntrl.control(us)):
-#     print(us2[0])
-#     us3.append(us2[0])
-#     x.append(count)
-#     y.append(xs2[0][0])
-#     x_follow.append(count)
-#     y_follow.append(x_path[count][0])
-#     count += 1
-#     cntrl.set_state(xs2[1])
-#     line1.set_ydata(y)
-#     line1.set_xdata(x)
-#     line2.set_ydata(y_follow)
-#     line2.set_xdata(x_follow)
-#     fig.canvas.draw()
-#     fig.canvas.flush_events()
-#     us = us[1:]
-#     if count == 199:
-#         break
-# # plt.show()
-#
-# print(us3)
-#
-# with open('test2.npy', 'wb') as f:
-#     np.save(f, us3)
+plt.ion()
+
+count = 0
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.set_xlim([0, 200])
+ax.set_ylim([-0.10, -0.80])
+x = []
+y = []
+x_follow = []
+y_follow = []
+us3 = []
+
+line1, = ax.plot(x, y, 'r-')
+line2, = ax.plot(x_follow, y_follow, 'b-')
+count = 0
+
+print(sys.getsizeof(cntrl.control(us)))
+
+# for a, b in cntrl.control(us):
+#     print(a)
+#     print(b)
+len_us = len(us)
+print(f"len(us)={len_us}")
+
+# with open('test.npy', 'wb') as f:
+#     np.save(f, us)
+# print(len(us))
+# print('step1')
+
+for xs2, us2 in tqdm(cntrl.control(us)):
+    print(us2[0])
+    us3.append(us2[0])
+    x.append(count)
+    y.append(xs2[0][0])
+    x_follow.append(count)
+    y_follow.append(x_path[count][0])
+    count += 1
+    cntrl.set_state(xs2[1])
+    line1.set_ydata(y)
+    line1.set_xdata(x)
+    line2.set_ydata(y_follow)
+    line2.set_xdata(x_follow)
+    fig.canvas.draw()
+    fig.canvas.flush_events()
+    us = us[1:]
+    if count == 199:
+        break
+# plt.show()
+
+print(us3)
+
+with open('test2.npy', 'wb') as f:
+    np.save(f, us3)
 # print(len(us))
 
 print('step2')
