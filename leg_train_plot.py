@@ -137,7 +137,7 @@ xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 # us = np.where(us>max_bounds,max_bounds,us)
 # us = np.where(us<min_bounds,min_bounds,us)
 
-print(us)
+#print(us)
 
 cost2 = PathQRCostMPC(Q[0], R, x_path, us)
 
@@ -146,6 +146,10 @@ ilqr2 = iLQR(dynamics, cost2, N-1)
 
 
 cntrl = RecedingHorizonControllerPath(x0, ilqr2)
+
+# print(J_hist)
+# print(type(J_hist))
+# print(len(J_hist))
 # plt.ion()
 #
 # count = 0
@@ -309,6 +313,12 @@ for i in range(N-1):
     path.append(y)
 
 path = np.array(path)
+
+#import scipy.io
+#scipy.io.savemat('test.mat',{'xpath':x_path,'gen_path':path,'us':us2})
+
+print(x_path.shape)
+print(path.shape)
 
 f,  axes = plt.subplots(2, 3, sharex=True)
 

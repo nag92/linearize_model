@@ -137,7 +137,7 @@ xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 # us = np.where(us>max_bounds,max_bounds,us)
 # us = np.where(us<min_bounds,min_bounds,us)
 
-print(us)
+#print(us)
 
 cost2 = PathQRCostMPC(Q[0], R, x_path, us)
 
@@ -146,6 +146,20 @@ ilqr2 = iLQR(dynamics, cost2, N-1)
 
 
 cntrl = RecedingHorizonControllerPath(x0, ilqr2)
+
+# print(J_hist)
+#
+# ###### if want to smooth J_hist
+#
+# plt.figure()
+#
+# plt.plot(J_hist)
+#
+# plt.xlabel('Iteration')
+# plt.ylabel('Cost')
+# plt.grid()
+#
+# plt.show()
 
 plt.ion()
 
@@ -282,10 +296,10 @@ for xs2, us2 in tqdm(cntrl.control(us)):
 #
 # print(us3)
 plt.ioff()
-with open('test_1-35.0e-5_4-63.0e-4.npy', 'wb') as f:
-    np.save(f, us3)
+# with open('test_1-35.0e-5_4-63.0e-4.npy', 'wb') as f:
+#     np.save(f, us3)
 plt.show()
-#
+
 
 
 # print(len(us))
