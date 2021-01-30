@@ -5,6 +5,50 @@ import rospy
 from rbdl_server.srv import RBDLModel, RBDLModelAlignment
 from rbdl_server.srv import RBDLForwardDynamics
 
+names = ['ExoLeftHip', 'ExoLeftKnee', 'ExoLeftAnkle',
+         'ExoRightHip', 'ExoRightKnee', 'ExoRightAnkle']
+
+
+
+def get_map():
+
+    try:
+        model_srv = rospy.ServiceProxy('AMBF2RBDL', RBDLModelAlignment)
+        resp1 = model_srv("exo", [])
+    except rospy.ServiceException as e:
+        print("Service call failed: %s" % e)
+
+    return {resp1.names[i]: resp1.ids[i] for i in range(len(resp1.names))}
+
+
+def ambf_to_rbdl(q,join_map):
+    """
+    make the order of the joints for the dynamics
+    """
+
+    joints_aligned = [0.0] * len(names)
+
+    for ii, name in enumerate(names):
+        index = joint_map[name] - 1
+        joints_aligned[index] = q[ii]
+
+    return joints_aligned
+
+
+def rbdl_to_ambf(q,joint_map):
+    """
+    reverse the order of the AMBF
+    """
+
+    q_new = [0.0] * len(names)
+
+    for ii, name in enumerate(names):
+        index = joint_map[name] - 1
+
+        q_new[ii] = q[index]
+
+    return q_new
+
 
 def make_dynamic_model(name, model_path):
     """"

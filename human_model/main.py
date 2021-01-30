@@ -9,16 +9,20 @@ from GaitAnaylsisToolkit.LearningTools.Runner import TPGMMRunner
 
 
 max_bounds = 10
-max_bounds = -10
+min_bounds = -10
+joint_map = {}
+
 
 def f(x, us, i):
 
     diff = (max_bounds - min_bounds) / 2.0
     mean = (max_bounds + min_bounds) / 2.0
     u = diff * np.tanh(us) + mean
-    y = model.runge_integrator(x, 0.01, u)
+    x_rearrange = model.ambf_to_rbdl(x, joint_map)
+    u_rearrange = model.ambf_to_rbdl(u, joint_map)
+    y = model.runge_integrator(x_rearrange, 0.01, u_rearrange)
 
-    return np.array(y)
+    return np.array( model.rbdl_to_ambf(y, joint_map) )
 
 
 def on_iteration(iteration_count, xs, us, J_opt, accepted, converged):
@@ -26,15 +30,19 @@ def on_iteration(iteration_count, xs, us, J_opt, accepted, converged):
     info = "converged" if converged else ("accepted" if accepted else "failed")
     print("iteration", iteration_count, info, J_opt)
 
+
 if __name__ == '__main__':
 
-    model_path = ""
-    model.make_dynamic_model("exo", model_path)
 
+    rospy.init_node("Base")
+
+    model_path = ""
+
+    model.make_dynamic_model("exo", model_path)
+    joint_map = model.get_map()
     dynamics = FiniteDiffDynamics(f, 12, 6)
 
     file_name = "/home/jack/backup/leg1.pickle"
-    # file_name = "/home/jack/catkin_ws/src/ambf_walker/Train/gotozero.pickle"
     runner = TPGMMRunner.TPGMMRunner(file_name)
 
     x_path = []
