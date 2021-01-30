@@ -1,16 +1,10 @@
 #!/usr/bin/env python
-import rbdl
 import model
 import numpy as np
-import theano.tensor as T
 import matplotlib.pyplot as plt
-from ilqr.dynamics import constrain
 
-from ilqr import iLQR, RecedingHorizonController
-from ilqr.cost import QRCost, PathQRCost, PathQsRCost
-
-from ilqr.dynamics import AutoDiffDynamics, BatchAutoDiffDynamics, FiniteDiffDynamics
-
+from ilqr import iLQR
+from ilqr.cost import PathQsRCost
 
 dt = 0.01  # Discrete time-step in seconds.
 tf = 2.0

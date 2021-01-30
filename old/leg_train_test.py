@@ -1,18 +1,12 @@
 #!/usr/bin/env python
-import rbdl
 import model
 import numpy as np
-import theano.tensor as T
 import matplotlib.pyplot as plt
-from ilqr.dynamics import constrain
 from GaitAnaylsisToolkit.LearningTools.Runner import TPGMMRunner
-from ilqr import iLQR, RecedingHorizonController
+from ilqr import iLQR
 from ilqr.controller import RecedingHorizonControllerPath
-from ilqr.cost import QRCost, PathQRCost, PathQsRCost, PathQRCostMPC
+from ilqr.cost import PathQRCost, PathQRCostMPC
 from ilqr.dynamics import FiniteDiffDynamics
-from ilqr.dynamics import AutoDiffDynamics, BatchAutoDiffDynamics, FiniteDiffDynamics
-import random
-import sys
 from tqdm import tqdm
 
 dt = 0.01  # Discrete time-step in seconds.
