@@ -9,6 +9,7 @@ bodies:
 joints:
 - JOINT ExoLeftKnee
 - JOINT ExoLeftAnkle
+- JOINT ExoLeftHip
 - JOINT ExoRightKnee
 - JOINT ExoRightAnkle
 - JOINT ExoRightHip
@@ -16,15 +17,14 @@ high resolution path: ./high_res/
 low resolution path: ./low_res/
 ignore inter-collision: false
 namespace: /ambf/env/
-
 BODY ExoHip:
   name: ExoHip
   mesh: ExoHip.STL
   mass: 45.32
   inertia:
-    ix: 3.6292
-    iy: 4.1578
-    iz: 1.1847
+    ix: 5.9172
+    iy: 6.1912
+    iz: 1.4393
   collision margin: 0.001
   scale: 1.0
   location:
@@ -154,11 +154,11 @@ BODY ExoLeftThigh:
 BODY ExoLeftShank:
   name: ExoLeftShank
   mesh: ExoLeftShank.STL
-  mass: 5.104
+  mass: 5.128
   inertia:
-    ix: 0.1359
-    iy: 0.1834
-    iz: 0.0559
+    ix: 0.1365
+    iy: 0.1843
+    iz: 0.0562
   collision margin: 0.001
   scale: 1.0
   location:
@@ -223,9 +223,9 @@ BODY ExoLeftFoot:
   mesh: ExoLeftFoot.STL
   mass: 1.898
   inertia:
-    ix: 0.0339
-    iy: 0.0269
-    iz: 0.0242
+    ix: 0.0312
+    iy: 0.0276
+    iz: 0.0405
   collision margin: 0.001
   scale: 1.0
   location:
@@ -290,9 +290,9 @@ BODY ExoRightThigh:
   mesh: ExoRightThigh.STL
   mass: 13.934
   inertia:
-    ix: 0.5767
-    iy: 0.5836
-    iz: 0.0297
+    ix: 0.5435
+    iy: 0.625
+    iz: 0.1152
   collision margin: 0.001
   scale: 1.0
   location:
@@ -355,11 +355,11 @@ BODY ExoRightThigh:
 BODY ExoRightShank:
   name: ExoRightShank
   mesh: ExoRightShank.STL
-  mass: 5.104
+  mass: 5.128
   inertia:
-    ix: 0.1359
-    iy: 0.1812
-    iz: 0.0536
+    ix: 0.1365
+    iy: 0.182
+    iz: 0.0539
   collision margin: 0.001
   scale: 1.0
   location:
@@ -424,9 +424,9 @@ BODY ExoRightFoot:
   mesh: ExoRightFoot.STL
   mass: 1.898
   inertia:
-    ix: 0.0339
-    iy: 0.0269
-    iz: 0.0242
+    ix: 0.0312
+    iy: 0.0276
+    iz: 0.0405
   collision margin: 0.001
   scale: 1.0
   location:
@@ -495,7 +495,6 @@ BODY ExoRightFoot:
       P: 50.0
       I: 0.5
       D: 0.5
-
 JOINT ExoLeftKnee:
   name: ExoLeftKnee
   parent: BODY ExoLeftThigh
@@ -564,6 +563,45 @@ JOINT ExoLeftAnkle:
     P: 2135.3999
     I: 5.0
     D: 4.271
+  body rotation:
+    xx: 1.0
+    xy: 0.0
+    xz: 0.0
+    yx: 0.0
+    yy: 1.0
+    yz: 0.0
+    zx: 0.0
+    zy: 0.0
+    zz: 1.0
+  detached: true
+  type: revolute
+  max motor impulse: 0.05000000074505806
+  damping: 0.5
+JOINT ExoLeftHip:
+  name: ExoLeftHip
+  parent: BODY ExoHip
+  child: BODY ExoLeftThigh
+  parent axis:
+    x: 1.0
+    y: 0.0
+    z: 0.0
+  parent pivot:
+    x: 0.2371
+    y: -0.124
+    z: -0.1441
+  child axis:
+    x: 1.0
+    y: 0.0
+    z: 0.0
+  child pivot:
+    x: -0.003
+    y: 0.0009
+    z: 0.1326
+  joint limits:
+    high: 0.524
+    low: -1.92
+  enable feedback: true
+  passive: false
   body rotation:
     xx: 1.0
     xy: 0.0
