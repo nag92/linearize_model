@@ -22,7 +22,7 @@ def f(x, us, i):
     u_rearrange = model.ambf_to_rbdl(u, joint_map)
     y = model.runge_integrator(x_rearrange, 0.01, u_rearrange)
 
-    return np.array( model.rbdl_to_ambf(y, joint_map) )
+    return np.array(model.rbdl_to_ambf(y, joint_map))
 
 
 def on_iteration(iteration_count, xs, us, J_opt, accepted, converged):
