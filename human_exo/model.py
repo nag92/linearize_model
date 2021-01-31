@@ -20,7 +20,7 @@ def dynamic_model(noise=0.0):
     mass["right_foot"] = 1.898+noise
     mass["left_foot"] = 1.898+noise
 
-    
+
     parent_dist = {}
     parent_dist["hip"] = np.array([0.0, 0.0, 0.0])
 
