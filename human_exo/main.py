@@ -18,7 +18,6 @@ my_model = model.dynamic_model()
 J_hist = []
 
 
-
 def on_iteration(iteration_count, xs, us, J_opt, accepted, converged):
     J_hist.append(J_opt)
     info = "converged" if converged else ("accepted" if accepted else "failed")
@@ -86,11 +85,14 @@ x_path = np.array(x_path)
 u_path = np.array(u_path)
 
 # R = 0.05 * np.eye(dynamics.action_size) # +/-10
-R = 5.0e-4 * np.eye(dynamics.action_size)
+R = 4.0e-4 * np.eye(dynamics.action_size)
 
-R[3,3] = 3.0e-3
-R[4,4] = 3.0e-3
-R[5,5] = 3.0e-3
+# R[0,0] = 3.0e-3
+# R[1,1] = 3.0e-3
+# R[2,2] = 3.0e-3
+R[3,3] = 7.0e-4
+R[4,4] = 7.0e-4
+R[5,5] = 7.0e-4
 #R[1,1] = 0.00005
 # R[4,4] = 5.0e-6
 #
