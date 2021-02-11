@@ -5,10 +5,9 @@ import matplotlib.pyplot as plt
 from GaitAnaylsisToolkit.LearningTools.Runner import TPGMMRunner
 from ilqr import iLQR
 from ilqr.controller import RecedingHorizonControllerPath
-from ilqr.cost import PathQsRCost, PathQRCostMPC
+from ilqr.cost import PathQRCost, PathQRCostMPC
 from ilqr.dynamics import FiniteDiffDynamics
 from tqdm import tqdm
-import scipy.io
 
 dt = 0.01  # Discrete time-step in seconds.
 tf = 2.0
@@ -110,7 +109,7 @@ print(R)
 us_init = np.random.uniform(-1, 1, (N-1, dynamics.action_size))
 #
 #
-cost = PathQsRCost(Q, R, x_path=x_path, u_path=u_path)
+cost = PathQRCost(Q[0], R, x_path=x_path, u_path=u_path)
 
 #print(cost)
 #
@@ -136,7 +135,7 @@ xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 
 #print(us)
 
-cost2 = PathQsRCost(Q, R, x_path, us)
+cost2 = PathQRCostMPC(Q[0], R, x_path, us)
 
 
 ilqr2 = iLQR(dynamics, cost2, N-1)
@@ -292,10 +291,9 @@ for xs2, us2 in tqdm(cntrl.control(us)):
 #
 # print(us3)
 plt.ioff()
+# with open('test_1-35.0e-5_4-63.0e-4.npy', 'wb') as f:
+#     np.save(f, us3)
 plt.show()
-
-with open('test_human.npy', 'wb') as f:
-    np.save(f, us3)
 
 
 

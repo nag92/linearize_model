@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from GaitAnaylsisToolkit.LearningTools.Runner import TPGMMRunner
 from ilqr import iLQR
 from ilqr.controller import RecedingHorizonControllerPath
-from ilqr.cost import PathQRCost, PathQRCostMPC
+from ilqr.cost import PathQsRCost, PathQRCostMPC
 from ilqr.dynamics import FiniteDiffDynamics
 from tqdm import tqdm
 from scipy.stats import entropy
@@ -122,7 +122,7 @@ def main_fuc(R1, R2, KL0):
     R[4,4] = R2
     R[5,5] = R2
     us_init = np.random.uniform(-1, 1, (N-1, dynamics.action_size))
-    cost = PathQRCost(Q[0], R, x_path=x_path, u_path=u_path)
+    cost = PathQsRCost(Q, R, x_path=x_path, u_path=u_path)
     #print(cost)
     J_hist = []
     ilqr = iLQR(dynamics, cost, N-1)
@@ -132,7 +132,7 @@ def main_fuc(R1, R2, KL0):
     # print(us)
     # print(xs)
     # print(us)
-    cost2 = PathQRCostMPC(Q[0], R, x_path, us)
+    cost2 = PathQsRCost(Q, R, x_path, us)
     ilqr2 = iLQR(dynamics, cost2, N-1)
     cntrl = RecedingHorizonControllerPath(x0, ilqr2)
     # print(J_hist)
