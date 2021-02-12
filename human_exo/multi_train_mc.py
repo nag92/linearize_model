@@ -10,6 +10,8 @@ from ilqr.dynamics import FiniteDiffDynamics
 from tqdm import tqdm
 from scipy.stats import entropy
 import gc
+from itertools import product
+from multiprocessing import Pool
 
 dt = 0.01  # Discrete time-step in seconds.
 tf = 2.0
@@ -30,8 +32,8 @@ def on_iteration(iteration_count, xs, us, J_opt, accepted, converged):
 
 
 ##### 8 and -8
-max_bounds = 10.0
-min_bounds = -10.0
+# max_bounds = 10.0
+# min_bounds = -10.0
 
 def measure_d(list_1, list_2):
     #### list length should be same
@@ -112,9 +114,12 @@ R = np.eye(dynamics.action_size)
 
 # print(R)
 
-KL0 = 1.0e5
+# KL0 = 1.0e5
 
-def main_fuc(R1, R2, KL0):
+def main_fuc(R0):
+    # print(R0)
+    R1 = R0[0]
+    R2 = R0[1]
     R[0,0] = R1
     R[1,1] = R1
     R[2,2] = R1
@@ -284,28 +289,65 @@ def main_fuc(R1, R2, KL0):
     KL = KL1 + KL2 + KL3 + KL4 + KL5 + KL6
 
     fname = f'R1_{R1}_R2_{R2}_KL_{KL}.png'
-    s_path = f'./figures/{fname}'
+    s_path = f'./figures_new/{fname}'
     plt.savefig(s_path)
 
     plt.close('all')
 
     print(KL)
 
-    if KL > KL0:
-        KL = KL0
+    # if KL > KL0:
+    #     KL = KL0
 
     gc.collect()
     return KL
 
-R_range = [1e-3,2e-3,3e-3,4e-3,5e-3,6e-3,7e-3,8e-3,9e-3,1e-4,2e-4,3e-4,4e-4,5e-4,6e-4,7e-4,8e-4,9e-4]
+# for R1 in R_range:
+#     # R1 = R1 * 1.0e-4
+#     for R2 in R_range:
+#         # R2 = R2 * 1.0e-4
+#         KL0 = main_fuc(R1,R2, KL0)
+#         # KL = main_fuc(R_1, R_2)
+#         # if KL > KL0:
+#         #     KL = KL0
 
-for R1 in R_range:
-    # R1 = R1 * 1.0e-4
-    for R2 in R_range:
-        # R2 = R2 * 1.0e-4
-        KL0 = main_fuc(R1,R2, KL0)
-        # KL = main_fuc(R_1, R_2)
-        # if KL > KL0:
-        #     KL = KL0
+if __name__ == '__main__':
+    dt = 0.01  # Discrete time-step in seconds.
+    tf = 2.0
+    m = 1.0  # Mass in kg.
+    alpha = 0.1  # Friction coefficient.
+    my_model = model.dynamic_model()
+    J_hist = []
+    dynamics = FiniteDiffDynamics(f, 12, 6)
+    file_name = "/home/jack/backup/leg1.pickle"
+    runner = TPGMMRunner.TPGMMRunner(file_name)
+    x_path = []
+    u_path = []
+    count = 0
+    N = runner.get_length()
+    while count < runner.get_length():
+        count += 1
+        runner.step()
+        u_path.append(runner.ddx.flatten().tolist())
+        ##### set it to be random no from -5 to 5 (u_p)
+        x = runner.x.flatten().tolist() + runner.dx.flatten().tolist()
+        x_path.append(x)
+    u_path = u_path[:-1]
+    expSigma = runner.get_expSigma()
+    size = expSigma[0].shape[0]
+    Q = [np.zeros((size*2, size*2))]*len(expSigma)
+    for ii in range(len(expSigma)-2, -1, -1):
+        Q[ii][:size, :size] = np.linalg.pinv(expSigma[ii])
+    x0 = x_path[0]
+    x_path = np.array(x_path)
+    u_path = np.array(u_path)
+    # R = 0.05 * np.eye(dynamics.action_size) # +/-10
+    R = np.eye(dynamics.action_size)
 
-print(KL0)
+    R_range = [1e-3,2e-3,3e-3,4e-3,5e-3,6e-3,7e-3,8e-3,9e-3,1e-4,2e-4,3e-4,4e-4,5e-4,6e-4,7e-4,8e-4,9e-4]
+    R_m = product(R_range, repeat = 2)
+
+    with Pool(8) as p:
+        ALL_KL=p.map(main_fuc,R_m)
+
+print(ALL_KL)

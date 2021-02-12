@@ -294,8 +294,8 @@ for xs2, us2 in tqdm(cntrl.control(us)):
 plt.ioff()
 plt.show()
 
-with open('test_human.npy', 'wb') as f:
-    np.save(f, us3)
+# with open('test_human.npy', 'wb') as f:
+#     np.save(f, us3)
 
 
 
