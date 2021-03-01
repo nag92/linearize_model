@@ -8,6 +8,7 @@ from ilqr.controller import RecedingHorizonControllerPath
 from ilqr.cost import PathQsRCost, PathQRCostMPC
 from ilqr.dynamics import FiniteDiffDynamics
 from tqdm import tqdm
+import scipy.io
 
 dt = 0.01  # Discrete time-step in seconds.
 tf = 2.0
@@ -16,7 +17,6 @@ alpha = 0.1  # Friction coefficient.
 
 my_model = model.dynamic_model()
 J_hist = []
-
 
 
 def on_iteration(iteration_count, xs, us, J_opt, accepted, converged):
@@ -29,8 +29,8 @@ def on_iteration(iteration_count, xs, us, J_opt, accepted, converged):
 
 
 ##### 8 and -8
-max_bounds = 10.0
-min_bounds = -10.0
+# max_bounds = 10.0
+# min_bounds = -10.0
 
 
 def f(x, us, i):
@@ -86,11 +86,14 @@ x_path = np.array(x_path)
 u_path = np.array(u_path)
 
 # R = 0.05 * np.eye(dynamics.action_size) # +/-10
-R = 5.0e-4 * np.eye(dynamics.action_size)
+R = 4.0e-4 * np.eye(dynamics.action_size)
 
-R[3,3] = 3.0e-3
-R[4,4] = 3.0e-3
-R[5,5] = 3.0e-3
+# R[0,0] = 3.0e-3
+# R[1,1] = 3.0e-3
+# R[2,2] = 3.0e-3
+R[3,3] = 7.0e-4
+R[4,4] = 7.0e-4
+R[5,5] = 7.0e-4
 #R[1,1] = 0.00005
 # R[4,4] = 5.0e-6
 #
@@ -133,7 +136,8 @@ xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 
 #print(us)
 
-cost2 = PathQRCostMPC(Q, R, x_path, us)
+cost2 = PathQsRCost(Q, R, x_path, us)
+
 
 
 ilqr2 = iLQR(dynamics, cost2, N-1)
@@ -215,7 +219,6 @@ line9, = ax5.plot(x5, y5, 'r-')
 line10, = ax5.plot(x5_follow, y5_follow, 'b-')
 line11, = ax6.plot(x6, y6, 'r-')
 line12, = ax6.plot(x6_follow, y6_follow, 'b-')
-count = 0
 
 #print(sys.getsizeof(cntrl.control(us)))
 
@@ -290,9 +293,10 @@ for xs2, us2 in tqdm(cntrl.control(us)):
 #
 # print(us3)
 plt.ioff()
-# with open('test_1-35.0e-5_4-63.0e-4.npy', 'wb') as f:
-#     np.save(f, us3)
 plt.show()
+
+# with open('test_human.npy', 'wb') as f:
+#     np.save(f, us3)
 
 
 
