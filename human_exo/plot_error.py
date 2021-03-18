@@ -116,7 +116,7 @@ R2_m = value_m(R2)
 
 Xs = R1_m
 Ys = R2_m
-Zs = KL
+Zs = KL/176.0
 surf = ax.plot_trisurf(Xs, Ys, Zs, cmap=cm.jet, linewidth=0)
 fig.colorbar(surf)
 

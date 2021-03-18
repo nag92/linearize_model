@@ -86,14 +86,14 @@ x_path = np.array(x_path)
 u_path = np.array(u_path)
 
 # R = 0.05 * np.eye(dynamics.action_size) # +/-10
-R = 4.0e-4 * np.eye(dynamics.action_size)
+R = 1.0e-4 * np.eye(dynamics.action_size)
 
-# R[0,0] = 3.0e-3
-# R[1,1] = 3.0e-3
-# R[2,2] = 3.0e-3
-R[3,3] = 7.0e-4
-R[4,4] = 7.0e-4
-R[5,5] = 7.0e-4
+R[0,0] = 1.0e-4
+R[1,1] = 1.0e-4
+R[2,2] = 0.1
+R[3,3] = 1.0e-4
+R[4,4] = 1.0e-4
+R[5,5] = 0.1
 #R[1,1] = 0.00005
 # R[4,4] = 5.0e-6
 #
@@ -165,21 +165,35 @@ fig = plt.figure()
 ax1 = fig.add_subplot(321)
 ax1.set_xlim([0, 177])
 ax1.set_ylim([-0.4, 0.6])
+ax1.set_xlabel('iteration',fontsize=15)
+ax1.set_ylabel('left hip',fontsize=15)
 ax2 = fig.add_subplot(323)
 ax2.set_xlim([0, 177])
 ax2.set_ylim([-0.2, 2.0])
+ax2.set_xlabel('iteration',fontsize=15)
+ax2.set_ylabel('left knee',fontsize=15)
 ax3 = fig.add_subplot(325)
 ax3.set_xlim([0, 177])
 ax3.set_ylim([-0.3, 0.3])
+ax3.set_xlabel('iteration',fontsize=15)
+ax3.set_ylabel('left ankle',fontsize=15)
 ax4 = fig.add_subplot(322)
 ax4.set_xlim([0, 177])
 ax4.set_ylim([-0.8, 0.6])
+ax4.set_xlabel('iteration',fontsize=15)
+ax4.set_ylabel('right hip',fontsize=15)
 ax5 = fig.add_subplot(324)
 ax5.set_xlim([0, 177])
 ax5.set_ylim([0.0, 1.7])
+ax5.set_xlabel('iteration',fontsize=15)
+ax5.set_ylabel('right knee',fontsize=15)
 ax6 = fig.add_subplot(326)
 ax6.set_xlim([0, 177])
 ax6.set_ylim([-0.3, 0.3])
+ax6.set_xlabel('iteration',fontsize=15)
+ax6.set_ylabel('right ankle',fontsize=15)
+
+
 x1 = []
 y1 = []
 x1_follow = []
@@ -206,18 +220,18 @@ x6_follow = []
 y6_follow = []
 us3 = []
 
-line1, = ax1.plot(x1, y1, 'r-')
-line2, = ax1.plot(x1_follow, y1_follow, 'b-')
-line3, = ax2.plot(x2, y2, 'r-')
-line4, = ax2.plot(x2_follow, y2_follow, 'b-')
-line5, = ax3.plot(x3, y3, 'r-')
-line6, = ax3.plot(x3_follow, y3_follow, 'b-')
-line7, = ax4.plot(x4, y4, 'r-')
-line8, = ax4.plot(x4_follow, y4_follow, 'b-')
-line9, = ax5.plot(x5, y5, 'r-')
-line10, = ax5.plot(x5_follow, y5_follow, 'b-')
-line11, = ax6.plot(x6, y6, 'r-')
-line12, = ax6.plot(x6_follow, y6_follow, 'b-')
+line1, = ax1.plot(x1, y1, 'r-',label = 'generated')
+line2, = ax1.plot(x1_follow, y1_follow, 'b-',label = 'desired')
+line3, = ax2.plot(x2, y2, 'r-',label = 'generated')
+line4, = ax2.plot(x2_follow, y2_follow, 'b-',label = 'desired')
+line5, = ax3.plot(x3, y3, 'r-',label = 'generated')
+line6, = ax3.plot(x3_follow, y3_follow, 'b-',label = 'desired')
+line7, = ax4.plot(x4, y4, 'r-',label = 'generated')
+line8, = ax4.plot(x4_follow, y4_follow, 'b-',label = 'desired')
+line9, = ax5.plot(x5, y5, 'r-',label = 'generated')
+line10, = ax5.plot(x5_follow, y5_follow, 'b-',label = 'desired')
+line11, = ax6.plot(x6, y6, 'r-',label = 'generated')
+line12, = ax6.plot(x6_follow, y6_follow, 'b-',label = 'desired')
 
 #print(sys.getsizeof(cntrl.control(us)))
 
@@ -230,6 +244,8 @@ line12, = ax6.plot(x6_follow, y6_follow, 'b-')
 for xs2, us2 in tqdm(cntrl.control(us)):
     print(us2[0])
     #print(type(us2[0]))
+    print(us2)
+    print(us2[0])
     us3.append(us2[0])
     x1.append(count)
     y1.append(xs2[0][0])
@@ -255,8 +271,8 @@ for xs2, us2 in tqdm(cntrl.control(us)):
     y6.append(xs2[0][5])
     x6_follow.append(count)
     y6_follow.append(x_path[count][5])
-    print(xs2[0][0:6])
-    print(x_path[count][0:6])
+    # print(xs2[0][0:6])
+    # print(x_path[count][0:6])
     count += 1
     cntrl.set_state(xs2[1])
     line1.set_ydata(y1)
@@ -292,9 +308,15 @@ for xs2, us2 in tqdm(cntrl.control(us)):
 #
 # print(us3)
 plt.ioff()
+ax1.legend()
+ax2.legend()
+ax3.legend()
+ax4.legend()
+ax5.legend()
+ax6.legend()
 plt.show()
 
-# with open('test_human.npy', 'wb') as f:
+# with open('test_human_new.npy', 'wb') as f:
 #     np.save(f, us3)
 
 
