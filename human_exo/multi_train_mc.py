@@ -369,7 +369,7 @@ if __name__ == '__main__':
 
     R_m = iter(R_m)
 
-    with Pool(16) as p:
+    with Pool(20) as p:
         ALL_KL=p.map(main_fuc,R_m)
 
 print(ALL_KL)
