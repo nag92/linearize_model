@@ -11,7 +11,6 @@ from tqdm import tqdm
 from scipy.stats import entropy
 import gc
 from itertools import product
-from itertools import combinations_with_replacement
 from multiprocessing import Pool
 import scipy.io
 
@@ -76,7 +75,7 @@ def f2(x, u, i):
 
 dynamics = FiniteDiffDynamics(f, 12, 6)
 
-file_name = "/home/jack/backup/leg1.pickle"
+file_name = "./leg1.pickle"
 #file_name = "/home/jack/catkin_ws/src/ambf_walker/Train/gotozero.pickle"
 runner = TPGMMRunner.TPGMMRunner(file_name)
 
@@ -297,9 +296,9 @@ def main_fuc(R0):
     KL = KL1 + KL2 + KL3 + KL4 + KL5 + KL6
 
     fname = f'R1_{R1}_R2_{R2}_R3_{R3}_KL_{KL}.png'
-    s_path = f'./data1/{fname}'
+    s_path = f'./data2/{fname}'
     dname = f'R1_{R1}_R2_{R2}_R3_{R3}_KL_{KL}.mat'
-    d_path = f'./data1/{dname}'
+    d_path = f'./data2/{dname}'
     plt.savefig(s_path)
     scipy.io.savemat(d_path,mdict={'y1':y1, 'y2':y2, 'y3':y3, 'y4':y4, 'y5':y5, 'y6':y6,'y1_follow':y1_follow, 'y2_follow':y2_follow, 'y3_follow':y3_follow, 'y4_follow':y4_follow, 'y5_follow':y5_follow, 'y6_follow':y6_follow, 'torque':us3})
 
@@ -330,7 +329,7 @@ if __name__ == '__main__':
     my_model = model.dynamic_model()
     J_hist = []
     dynamics = FiniteDiffDynamics(f, 12, 6)
-    file_name = "/home/jack/backup/leg1.pickle"
+    file_name = "./leg1.pickle"  ##### mayreplace this file
     runner = TPGMMRunner.TPGMMRunner(file_name)
     x_path = []
     u_path = []
@@ -355,13 +354,23 @@ if __name__ == '__main__':
     # R = 0.05 * np.eye(dynamics.action_size) # +/-10
     R = np.eye(dynamics.action_size)
 
-    # R_range = [1e-3,2e-3,3e-3,4e-3,5e-3,6e-3,7e-3,8e-3,9e-3,1e-4,2e-4,3e-4,4e-4,5e-4,6e-4,7e-4,8e-4,9e-4]
-    R_range = [1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1,1e1,1e2]
-    # R_m = product(R_range, repeat = 2)
-    R_m = combinations_with_replacement(R_range,3)
+    R_range1 = [1e-4,2e-4,3e-4,4e-4,5e-6,6e-6,7e-6,8e-6,9e-6,1e-5,2e-5,3e-5,4e-5,5e-5,6e-5,7e-5,8e-5,9e-5]
+    R_range2 = [1e-4,2e-4,3e-4,4e-4,5e-4,6e-4,7e-4,8e-4,9e-4,1e-3,2e-3,3e-3,4e-3,5e-5,6e-5,7e-5,8e-5,9e-5]
+    R_range3 = [1e-2,2e-2,3e-2,4e-2,5e-2,6e-2,7e-2,8e-2,9e-2,1e-1,2e-1,3e-1,4e-1,5e-3,6e-3,7e-3,8e-3,9e-3]
+    # R_range = [1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1,1e1,1e2]
+    # R_m = product(R_range, repeat = 3)
 
-    with Pool(8) as p:
+    R_m = []
+
+    for R1_ele in R_range1:
+        for R2_ele in R_range2:
+            for R3_ele in R_range3:
+                R_m.append((R1_ele,R2_ele,R3_ele))
+
+    R_m = iter(R_m)
+
+    with Pool(16) as p:
         ALL_KL=p.map(main_fuc,R_m)
 
 print(ALL_KL)
-scipy.io.savemat('all_kl.mat',mdict={'All_KL':ALL_KL})
+scipy.io.savemat('all_kl_2.mat',mdict={'All_KL':ALL_KL})
