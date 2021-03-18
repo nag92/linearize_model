@@ -139,6 +139,7 @@ xs, us = ilqr.fit(x0, us_init, on_iteration=on_iteration)
 cost2 = PathQsRCost(Q, R, x_path, us)
 
 
+
 ilqr2 = iLQR(dynamics, cost2, N-1)
 
 
